@@ -95,10 +95,11 @@
 //   actions
 // }
 
-import { login } from '@/api/user'
+import { login, getUserInfo } from '@/api/user'
 import { setToken, getToken } from '@/utils/auth'
 const state = {
-  token: getToken()
+  token: getToken(),
+  userInfo: {}
 }
 const mutations = {
   setToken(state, data) {
@@ -109,6 +110,12 @@ const mutations = {
   },
   removeToken(state) {
     state.token = null
+  },
+  setUserInfo(state, data) {
+    state.userInfo = { ...data }
+  },
+  removeUserInfo(state) {
+    state.userInfo = {}
   }
 }
 const actions = {
@@ -123,6 +130,11 @@ const actions = {
     } catch (error) {
       console.log('报错', error)
     }
+  },
+  async getUserInfo(store) {
+    const res = await getUserInfo()
+    console.log(res.data)
+    store.commit('setUserInfo', res)
   }
 }
 

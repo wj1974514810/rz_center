@@ -66,7 +66,8 @@
 import router from '@/router'
 import store from '@/store'
 
-router.beforeEach((to, from, next) => {
+// 路由守卫
+router.beforeEach(async(to, from, next) => {
   const list = ['/login', '/404']
   //  如果有token
   if (store.getters.token) {
@@ -75,6 +76,9 @@ router.beforeEach((to, from, next) => {
       next('/')
     } else {
       // 其他页面 放行
+      if (!store.getters.userId) {
+        await store.dispatch('user/getUserInfo')
+      }
       next()
     }
   } else {
