@@ -95,7 +95,7 @@
 //   actions
 // }
 
-import { login, getUserInfo } from '@/api/user'
+import { login, getUserInfo, getUserDetailById } from '@/api/user'
 import { setToken, getToken } from '@/utils/auth'
 const state = {
   token: getToken(),
@@ -133,8 +133,11 @@ const actions = {
   },
   async getUserInfo(store) {
     const res = await getUserInfo()
+    const baseInfo = await getUserDetailById(res.userId)
+    // 将两个接口返回对象结果合并
+    const baseRes = { ...baseInfo, ...res }
     console.log(res.data)
-    store.commit('setUserInfo', res)
+    store.commit('setUserInfo', baseRes)
   }
 }
 
