@@ -62,5 +62,3 @@
 //   // finish progress bar
 //   NProgress.done()
 // })
-
-

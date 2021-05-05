@@ -95,14 +95,37 @@
 //   actions
 // }
 
-const state = {}
-const action = {}
-const mutations = {}
+import { login } from '@/api/user'
+import { setToken, getToken } from '@/utils/auth'
+const state = {
+  token: getToken()
+}
+const mutations = {
+  setToken(state, data) {
+    // 数据存放在cookie   持久化
+    setToken(data)
+    // 改变token
+    state.token = data
+  },
+  removeToken(state) {
+    state.token = null
+  }
+}
+const actions = {
+  async login(store, data) {
+    // 调用登录接口
+    const res = await login(data)
+    console.log(res)
+    // 拿到token 给mutations  更改token值
+    const token = res.data.data
+    store.commit('setToken', token)
+  }
+}
 
 export default {
   namespaced: true,
   state,
-  action,
+  actions,
   mutations
 }
 

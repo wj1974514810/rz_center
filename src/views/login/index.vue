@@ -43,12 +43,12 @@
         </span>
       </el-form-item>
 
-      <el-button class="loginBtn" :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
+      <el-button class="loginBtn" :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登录{{ $store.getters.token }}</el-button>
 
-      <!-- <div class="tips">
-        <span style="margin-right:20px;">账号: 15555051282</span>
+      <div class="tips">
+        <span style="margin-right:20px;">账号: 13800000002</span>
         <span> 密码: 123456</span>
-      </div> -->
+      </div>
 
     </el-form>
   </div>
@@ -56,7 +56,6 @@
 
 <script>
 import { validMB } from '@/utils/validate'
-import { login } from '@/api/user.js'
 
 export default {
   name: 'Login',
@@ -119,8 +118,9 @@ export default {
       })
     },
     handleLogin() {
-      const res = login(this.loginForm)
-      console.log(res)
+      this.$store.dispatch('user/login', this.loginForm)
+      // const res = login(this.loginForm)
+      // console.log(res)
       // this.$refs.loginForm.validate(valid => {
       //   if (valid) {
       //     this.loading = true
@@ -174,8 +174,11 @@ $cursor: #fff;
       caret-color: $cursor;
 
       &:-webkit-autofill {
-        box-shadow: 0 0 0px 1000px $bg inset !important;
-        -webkit-text-fill-color: $cursor !important;
+        transition-delay: 99999s;
+        -webkit-transition-delay: 99999s;
+        transition: color 99999s ease-out, background-color 99999s ease-out;
+        -webkit-transition: color 99999s ease-out, background-color 99999s ease-out;
+
       }
     }
   }
