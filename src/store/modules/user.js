@@ -113,12 +113,16 @@ const mutations = {
 }
 const actions = {
   async login(store, data) {
-    // 调用登录接口
-    const res = await login(data)
-    console.log(res)
-    // 拿到token 给mutations  更改token值
-    const token = res.data.data
-    store.commit('setToken', token)
+    try {
+      // 调用登录接口
+      const res = await login(data)
+      console.log(res)
+      // 拿到token 给mutations  更改token值
+      // const token = res.data.data
+      store.commit('setToken', res)
+    } catch (error) {
+      console.log('报错', error)
+    }
   }
 }
 

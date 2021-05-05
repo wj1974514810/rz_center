@@ -43,7 +43,7 @@
         </span>
       </el-form-item>
 
-      <el-button class="loginBtn" :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登录{{ $store.getters.token }}</el-button>
+      <el-button class="loginBtn" :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登录</el-button>
 
       <div class="tips">
         <span style="margin-right:20px;">账号: 13800000002</span>
@@ -80,8 +80,8 @@ export default {
 
     return {
       loginForm: {
-        mobile: '',
-        password: ''
+        mobile: '13800000002',
+        password: '123456'
       },
       loginRules: {
         mobile: [
@@ -117,8 +117,14 @@ export default {
         this.$refs.password.focus()
       })
     },
-    handleLogin() {
-      this.$store.dispatch('user/login', this.loginForm)
+    async handleLogin() {
+      // validate 对整个表单进行校验的方法，参数为一个回调函数。该回调函数会在校验结束后被调用，并传入两个参数：是否校验成功和未通过校验的字段。若不传入回调函数，则会返回一个 promise
+      await this.$refs.loginForm.validate()
+      this.loading = true
+      // 调用 actions
+      await this.$store.dispatch('user/login', this.loginForm)
+      this.loading = false
+      this.$router.push({ path: '/' })
       // const res = login(this.loginForm)
       // console.log(res)
       // this.$refs.loginForm.validate(valid => {
