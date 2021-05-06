@@ -96,7 +96,7 @@
 // }
 
 import { login, getUserInfo, getUserDetailById } from '@/api/user'
-import { setToken, getToken, removeToken } from '@/utils/auth'
+import { setToken, getToken, removeToken, setTimeStamp } from '@/utils/auth'
 const state = {
   token: getToken(),
   userInfo: {}
@@ -129,6 +129,7 @@ const actions = {
       // 拿到token 给mutations  更改token值
       // const token = res.data.data
       store.commit('setToken', res)
+      setTimeStamp()
     } catch (error) {
       console.log('报错', error)
     }
@@ -141,6 +142,7 @@ const actions = {
     console.log(res.data)
     store.commit('setUserInfo', baseRes)
   },
+  // actions 里面可异步可同步 ，但异步必须放在里面
   logout(store) {
     // 调用两个mutation mutations里面的叫mutation
     store.commit('removeToken')
