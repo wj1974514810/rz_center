@@ -96,7 +96,7 @@
 // }
 
 import { login, getUserInfo, getUserDetailById } from '@/api/user'
-import { setToken, getToken } from '@/utils/auth'
+import { setToken, getToken, removeToken } from '@/utils/auth'
 const state = {
   token: getToken(),
   userInfo: {}
@@ -110,6 +110,8 @@ const mutations = {
   },
   removeToken(state) {
     state.token = null
+    // 调用removeToken 清除cookie
+    removeToken()
   },
   setUserInfo(state, data) {
     state.userInfo = { ...data }
@@ -138,6 +140,11 @@ const actions = {
     const baseRes = { ...baseInfo, ...res }
     console.log(res.data)
     store.commit('setUserInfo', baseRes)
+  },
+  logout(store) {
+    // 调用两个mutation mutations里面的叫mutation
+    store.commit('removeToken')
+    store.commit('removeUserInfo')
   }
 }
 
