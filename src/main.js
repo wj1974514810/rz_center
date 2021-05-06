@@ -35,6 +35,20 @@ Vue.use(ElementUI, { locale })
 
 Vue.config.productionTip = false
 
+// 自定义指令
+// 第一种
+// Vue.directive('imgerr', {
+//   inserted(dom, options) {
+//     dom.onerror = function() {
+//       dom.src = options.value
+//     }
+//   }
+// })
+
+// 第二种  封装在一个指令文件里面  然后引进来
+import { imgerr } from '@/directive'
+Vue.directive('imgerr', imgerr)
+
 new Vue({
   el: '#app',
   router,

@@ -12,7 +12,8 @@
     <div class="right-menu">
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
-          <img :src="staffPhoto" class="user-avatar">
+          <!--v-imgerr自定义指令， require会解析这个本地图片路径，如果不解析就会失败  -->
+          <img v-imgerr="require('@/assets/common/head.jpg')" :src="staffPhoto" class="user-avatar">
           <span class="name">{{ name }}</span>
           <i class="el-icon-caret-bottom" style="color:#fff" />
         </div>
