@@ -129,6 +129,7 @@ const actions = {
       // 拿到token 给mutations  更改token值
       // const token = res.data.data
       store.commit('setToken', res)
+      // 存储时间戳
       setTimeStamp()
     } catch (error) {
       console.log('报错', error)
@@ -139,7 +140,6 @@ const actions = {
     const baseInfo = await getUserDetailById(res.userId)
     // 将两个接口返回对象结果合并
     const baseRes = { ...baseInfo, ...res }
-    console.log(res.data)
     store.commit('setUserInfo', baseRes)
   },
   // actions 里面可异步可同步 ，但异步必须放在里面
