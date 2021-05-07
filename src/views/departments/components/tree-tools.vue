@@ -17,9 +17,9 @@
             <!-- 下拉菜单 -->
             <el-dropdown-menu slot="dropdown">
               <!--编辑部门和删除部门只会在子节点上显示-->
-              <el-dropdown-item v-if="!isRoot">添加部门</el-dropdown-item>
-              <el-dropdown-item>修改部门</el-dropdown-item>
-              <el-dropdown-item v-if="!isRoot">删除部门</el-dropdown-item>
+              <el-dropdown-item @click.native="addDepart">添加部门</el-dropdown-item>
+              <el-dropdown-item v-if="!isRoot">修改部门</el-dropdown-item>
+              <el-dropdown-item v-if="!isRoot" @click.native="delDepartments">删除部门</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </el-col>
@@ -28,6 +28,7 @@
   </el-row>
 </template>
 <script>
+import { delDepartments } from '@/api/departments'
 export default {
   props: {
     treeNod: {
@@ -38,6 +39,22 @@ export default {
     isRoot: {
       type: Boolean,
       required: true
+    }
+  },
+  methods: {
+    // 删除部门
+    async delDepartments() {
+      try {
+        await this.$confirm('是否确认删除')
+        await delDepartments(this.treeNod.id)
+        this.$message.success('删除成功')
+        this.$emit('delDepartment')
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    addDepart() {
+      this.$emit('addDepart', this.treeNod)
     }
   }
 }
