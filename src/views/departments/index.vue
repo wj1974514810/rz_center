@@ -4,7 +4,7 @@
       <el-card class="tree-card">
         <Trees :tree-nod="componey" :is-root="true" />
         <hr>
-        <el-tree :data="departs" :props="defaultProps">
+        <el-tree default-expand-all :data="departs" :props="defaultProps">
           <template #default="scoped">
             <Trees :tree-nod="scoped.data" :is-root="false" />
           </template>
@@ -16,6 +16,8 @@
 
 <script>
 import Trees from './components/tree-tools'
+import { getDepartments } from '@/api/departments'
+import { listTreeData } from '@/utils/index'
 export default {
   components: { Trees },
   data() {
@@ -24,11 +26,19 @@ export default {
       defaultProps: {
         label: 'name'
       },
-      departs: [
-        { name: '总裁办', children: [{ name: '董事会' }] },
-        { name: '行政部' },
-        { name: '人事部' }
-      ]
+      departs: []
+    }
+  },
+  // created与钩子函数是一样的，只不过钩子函数里可以操作DOM
+  created() {
+    this.getDepartments()
+  },
+  methods: {
+    // 获取部门列表
+    async getDepartments() {
+      const res = await getDepartments()
+      console.log(res)
+      this.departs = listTreeData(res.depts, '')
     }
   }
 }

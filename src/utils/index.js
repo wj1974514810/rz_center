@@ -115,3 +115,24 @@ export function param2Obj(url) {
   })
   return obj
 }
+
+// 组织架构  树形数据
+export function listTreeData(list, pid) {
+  // 遍历所有
+  list.forEach(item => {
+    // 如果不是顶级节点
+    if (item.pid !== pid) {
+      // 找到其他节点的id 与自身的父id 相同
+      const parent = list.find(el => el.id === item.pid)
+      // 如果有就放到父节点中去
+      if (parent) {
+        // 一开始的父节点不一定有子数据，保险起见
+        // 如果有就有  没有就给个空数组
+        parent.children = parent.children || []
+        parent.children.push(item)
+      }
+    }
+  })
+  // 放到父节点的数据 不会出现在顶级节点中
+  return list.filter(item => item.pid === pid)
+}
