@@ -1,9 +1,9 @@
 <template>
   <!-- 新增部门的弹层 -->
-  <el-dialog title="新增部门" :visible="showDialog">
+  <el-dialog :title="formData.id?'编辑部门':'新增部门'" :visible="showDialog" @close="btnCancel">
     <!-- 表单组件  el-form   label-width设置label的宽度   -->
     <!-- 匿名插槽 -->
-    <el-form label-width="120px" :model="formData" :rules="rules">
+    <el-form ref="addDept" label-width="120px" :model="formData" :rules="rules">
       <el-form-item label="部门名称" prop="name">
         <el-input v-model="formData.name" style="width:80%" placeholder="1-50个字符" />
       </el-form-item>
@@ -16,6 +16,7 @@
           style="width:80%"
           placeholder="请选择"
           @focus="getEmployeeSimple"
+          @blur="checkManager"
         >
           <el-option v-for="value in EmployeeList" :key="value.id" :value="value.username" :label="value.username" />
         </el-select>
@@ -28,15 +29,15 @@
     <el-row slot="footer" type="flex" justify="center">
       <!-- 列被分为24 -->
       <el-col :span="6">
-        <el-button type="primary" size="small">确定</el-button>
-        <el-button size="small">取消</el-button>
+        <el-button type="primary" size="small" @click="btnOk">确定</el-button>
+        <el-button size="small" @click="btnCancel">取消</el-button>
       </el-col>
     </el-row>
   </el-dialog>
 </template>
 
 <script>
-import { getDepartments } from '@/api/departments'
+import { getDepartments, addDepartments, getDepartmentDetail, editDepartment } from '@/api/departments'
 import { getEmployeeSimple } from '@/api/employees'
 export default {
   props: {
@@ -53,19 +54,36 @@ export default {
     //   验证规则  部门名称
     const checkNameRepeat = async(rule, value, callback) => {
       const { depts } = await getDepartments()
-      const isReat = depts
-      // 得到一个数组
-        .filter(item => item.pid === this.treeNode.id)
-        // 得到布尔值    false 表示无重复子部门   true表示有重复
-        .some(item => item.name === value)
 
+      let isReat = false
+      if (this.formData.id) {
+        // 编辑的时候必须把自己排除在外
+        isReat = depts
+        // 当前的 treeNode.pid 才是父部门
+          .filter(item => item.pid === this.treeNode.pid && item.id !== this.treeNode.id)
+        // 得到布尔值    false 表示无重复子部门   true表示有重复
+          .some(item => item.name === value)
+      } else {
+        // 新增
+        isReat = depts
+          .filter(item => item.pid === this.treeNode.id)
+          .some(item => item.name === value)
+      }
       isReat ? callback(new Error('部门名称不能重复')) : callback()
     }
     //   验证规则  部门编码
     const checkCodeRepeat = async(rule, value, callback) => {
       const { depts } = await getDepartments()
-      const isReat = depts
-        .some(item => item.code === value && value)
+      let isReat = depts
+      if (this.formData.id) {
+        // 编辑 的时候必须把自己排除在外 item.id !== this.treeNode.id
+        isReat = depts
+          .some(item => item.code === value && item.id !== this.treeNode.id)
+      } else {
+        // 新增
+        isReat = depts
+          .some(item => item.code === value && value)
+      }
 
       isReat ? callback(new Error('该编码已有部门使用')) : callback()
     }
@@ -103,6 +121,49 @@ export default {
       const res = await getEmployeeSimple()
       console.log(res)
       this.EmployeeList = res
+    },
+    checkManager() {
+      // 这是失去焦点的部门负责人, 需要手动触发校验
+      setTimeout(() => {
+        this.$refs.addDept.validateField('manager')
+      }, 200)
+    },
+    async btnOk() {
+      // 1. 表单校验 validate是表单的内部方法
+      await this.$refs.addDept.validate()
+      // 2. 发请求
+      // 如果是编辑请求,api 不相同
+      if (this.formData.id) {
+        // 编辑的api
+        await editDepartment(this.formData)
+      } else {
+        // 新增的api
+        await addDepartments({ ...this.formData, pid: this.treeNode.id })
+      }
+      // 3. 提醒用户
+      this.$message.success('操作成功')
+      // 4. 弹窗关闭
+      // this.showDialog = false
+      this.$emit('update:showDialog', false)
+      // 5. 加载新数据
+      this.$emit('addDepart')
+    },
+    btnCancel() {
+      // 点击取消时清空所有数据
+      this.formData = {
+        manager: '',
+        name: '',
+        introduce: '',
+        code: ''
+      }
+      // 这里是弹出框内置的清空，多用于清除表单校验
+      this.$refs.addDept.resetFields()
+      // 父传子 修改showDialog的值为false
+      this.$emit('update:showDialog', false)
+    },
+    async getDepartmentDetail(id) {
+      // 调用修改部门的api方法，把数据给formData
+      this.formData = await getDepartmentDetail(id)
     }
   }
 }

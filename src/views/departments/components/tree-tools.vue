@@ -18,7 +18,7 @@
             <el-dropdown-menu slot="dropdown">
               <!--编辑部门和删除部门只会在子节点上显示-->
               <el-dropdown-item @click.native="addDepart">添加部门</el-dropdown-item>
-              <el-dropdown-item v-if="!isRoot">修改部门</el-dropdown-item>
+              <el-dropdown-item v-if="!isRoot" @click.native="editDepartment">修改部门</el-dropdown-item>
               <el-dropdown-item v-if="!isRoot" @click.native="delDepartments">删除部门</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
@@ -46,6 +46,7 @@ export default {
     async delDepartments() {
       try {
         await this.$confirm('是否确认删除')
+        // 调用删除部门的api  传入要删除的部门id
         await delDepartments(this.treeNod.id)
         this.$message.success('删除成功')
         this.$emit('delDepartment')
@@ -53,8 +54,13 @@ export default {
         console.log(error)
       }
     },
+    // 新增  子传父
     addDepart() {
       this.$emit('addDepart', this.treeNod)
+    },
+    // 修改  子传父
+    editDepartment() {
+      this.$emit('editDepartment', this.treeNod)
     }
   }
 }
