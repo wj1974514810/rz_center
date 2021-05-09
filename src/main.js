@@ -49,6 +49,10 @@ Vue.config.productionTip = false
 import { imgerr } from '@/directive'
 Vue.directive('imgerr', imgerr)
 
+// 来自 components 里面的index.js文件
+import myComponents from '@/components'
+Vue.use(myComponents)
+
 new Vue({
   el: '#app',
   router,
