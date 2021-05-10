@@ -53,6 +53,17 @@ Vue.directive('imgerr', imgerr)
 import myComponents from '@/components'
 Vue.use(myComponents)
 
+// 过滤器的注册
+// 过滤器  只有一种的话  注册方式1
+// import { formateTime } from '@/filter/index'
+// Vue.filter('formateTime', formateTime)
+
+// 过滤器如果有很多的话，注册方式2
+import * as filters from '@/filter'
+Object.keys(filters).forEach(item => {
+  Vue.filter(item, filters[item])
+})
+
 new Vue({
   el: '#app',
   router,
