@@ -8,8 +8,8 @@
         <span slot="before">共{{ page.total }}记录</span>
         <template #after>
           <el-button size="small" type="warning" @click="$router.push('/import')">导入</el-button>
-          <el-button size="small" type="danger">导出</el-button>
-          <el-button size="small" type="primary">新增员工</el-button>
+          <el-button size="small" type="danger" @click="exportImport">导出</el-button>
+          <el-button size="small" type="primary" @click="addEmploy">新增员工</el-button>
           <!-- <el-button size="small" type="danger" @click="delAll">删除</el-button> -->
         </template>
       </PageTools>
@@ -53,16 +53,21 @@
           />
         </el-row>
       </el-card>
+      <add_employee :show-dialog.sync="showDialog" />
     </div>
   </div>
 </template>
 
 <script>
+import add_employee from './components/add-employee'
 import { getEmployeeList, delEmployee } from '@/api/employees'
 import EmployeeEnum from '@/api/constant/employees'
+import { formatDate } from '@/filter'
 export default {
+  components: { add_employee },
   data() {
     return {
+      showDialog: false,
       employessList: [],
       page: {
         page: 1, // 当前页码
@@ -75,6 +80,58 @@ export default {
     this.getEmployeeList()
   },
   methods: {
+    addEmploy() {
+      this.showDialog = true
+    },
+    async exportImport() {
+      const { export_json_to_excel } = await import('@/vendor/Export2Excel')
+      // console.log(export_json_to_excel)
+      // 拿到员工列表的所有数据
+      const { rows } = await getEmployeeList({ page: 1, size: this.page.total })
+      // 字典
+      const dict = {
+        '手机号': 'mobile',
+        '姓名': 'username',
+        '入职日期': 'timeOfEntry',
+        '聘用形式': 'formOfEmployment',
+        '转正日期': 'correctionTime',
+        '工号': 'workNumber',
+        '部门': 'departmentName'
+      }
+      // 把对象转换称数组  进行处理
+      const userData = rows.map(user => {
+        // 这里的user是一个个的对象
+        return this.object2Arrayy(user, dict)
+      })
+      // 导出
+      export_json_to_excel({
+        // 拿到上面转换完后的中文
+        header: Object.keys(dict),
+        // 拿到转换完后的数组数据  （数组里套数组）
+        data: userData
+      })
+    },
+    //
+    object2Arrayy(user, dict) {
+      const newUser = []
+      for (const key in dict) {
+        // console.log(key)
+        //  因为数据中的key是英文，想要导出的表头是中文的话，需要将中文和英文做对应
+        const enkey = dict[key]
+        // 定义变量
+        let value
+        if (enkey === 'timeOfEntry' || enkey === 'correctionTime') {
+          value = new Date(formatDate(user[enkey]))
+        } else if (enkey === 'formOfEmployment') {
+          const obj = EmployeeEnum.hireType.find(obj => obj.id === user[enkey])
+          value = obj ? obj.value : '未知'
+        } else {
+          value = user[enkey]
+        }
+        newUser.push(value)
+      }
+      return newUser
+    },
     async getEmployeeList() {
       const { total, rows } = await getEmployeeList(this.page)
       this.page.total = total
@@ -100,13 +157,6 @@ export default {
         console.log(error)
       }
     }
-    // delAll() {
-    //   console.log(this.employessList)
-    //   this.employessList.forEach(item => {
-    //     this.delEmply(item.id)
-    //     this.getEmployeeList()
-    //   })
-    // }
   }
 }
 </script>

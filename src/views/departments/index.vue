@@ -2,7 +2,7 @@
   <div class="dashboard-container">
     <div class="app-container">
       <el-card class="tree-card">
-        <Trees :tree-nod="componey" :is-root="true" @addDepart="addDepart" />
+        <Trees_tools :tree-nod="componey" :is-root="true" @addDepart="addDepart" />
         <hr>
         <el-tree :expand-on-click-node="false" default-expand-all :data="departs" :props="{label:'name'}">
           <template #default="scoped">
