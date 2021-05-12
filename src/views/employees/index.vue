@@ -71,7 +71,7 @@ export default {
       employessList: [],
       page: {
         page: 1, // 当前页码
-        size: 60,
+        size: 5,
         total: 0 // 总数
       }
     }
@@ -144,7 +144,8 @@ export default {
     // 聘用形式  格式化函数
     formatEmployment(row, column, cellValue, index) {
       // 要去找 1所对应的值
-      const obj = EmployeeEnum.hireType.find(item => item.id === cellValue)
+      // + cellValue 强制转换成数值型  不然添加会出现未知
+      const obj = EmployeeEnum.hireType.find(item => item.id === +cellValue)
       return obj ? obj.value : '未知'
     },
     async delEmply(id) {
@@ -152,6 +153,9 @@ export default {
         await this.$confirm('您确定删除该员工吗')
         await delEmployee(id)
         this.$message.success('删除成功')
+        if (this.employessList.length === 1 && this.page.page > 1) {
+          this.page.page--
+        }
         this.getEmployeeList()
       } catch (error) {
         console.log(error)
