@@ -33,8 +33,9 @@
             </template>
           </el-table-column>
           <el-table-column label="操作" align="center" sortable="" width="280">
+            <!-- 插槽 -->
             <template slot-scope="{ row }">
-              <el-button size="small" type="text">查看</el-button>
+              <el-button size="small" type="text" @click="$router.push(`/employees/detail/${row.id}`)">查看</el-button>
               <el-button size="small" type="text">转正</el-button>
               <el-button size="small" type="text">调岗</el-button>
               <el-button size="small" type="text">离职</el-button>
@@ -120,8 +121,11 @@ export default {
         const enkey = dict[key]
         // 定义变量
         let value
+        // 入职日期和转正日期 要进行格式的转换
         if (enkey === 'timeOfEntry' || enkey === 'correctionTime') {
           value = new Date(formatDate(user[enkey]))
+          // 聘用形式也要进行转换    1=正式 2=非正式
+          // 这里采用了枚举格式  来转换    枚举=》/api/constant/employess.js
         } else if (enkey === 'formOfEmployment') {
           const obj = EmployeeEnum.hireType.find(obj => obj.id === user[enkey])
           value = obj ? obj.value : '未知'
@@ -132,11 +136,13 @@ export default {
       }
       return newUser
     },
+    // 获取所有员工列表
     async getEmployeeList() {
       const { total, rows } = await getEmployeeList(this.page)
       this.page.total = total
       this.employessList = rows
     },
+    // 翻页
     changePgae(newPage) {
       this.page.page = newPage
       this.getEmployeeList()
@@ -148,11 +154,13 @@ export default {
       const obj = EmployeeEnum.hireType.find(item => item.id === +cellValue)
       return obj ? obj.value : '未知'
     },
+    // 删除员工
     async delEmply(id) {
       try {
         await this.$confirm('您确定删除该员工吗')
         await delEmployee(id)
         this.$message.success('删除成功')
+        // 如果这页删完，自动跳到上一页 并显示全部数据
         if (this.employessList.length === 1 && this.page.page > 1) {
           this.page.page--
         }

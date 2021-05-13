@@ -40,3 +40,19 @@ export function addEmployee(data) {
     data
   })
 }
+
+// 获取员工个人信息
+export function getUserDetailById(id) {
+  return request({
+    url: `/sys/user/${id}`
+  })
+}
+
+// 保存员工修改信息
+export function saveUserDetailById(data) {
+  return request({
+    method: 'put',
+    url: `/sys/user/${data.id}`,
+    data
+  })
+}
