@@ -17,8 +17,12 @@
               </el-form-item>
             </el-form>
           </el-tab-pane>
-          <el-tab-pane label="个人详情" />
-          <el-tab-pane label="岗位信息" />
+          <el-tab-pane label="个人详情">
+            <user_info />
+          </el-tab-pane>
+          <el-tab-pane label="岗位信息">
+            <job_info />
+          </el-tab-pane>
         </el-tabs>
       </el-card>
     </div>
@@ -27,7 +31,10 @@
 
 <script>
 import { getUserDetailById, saveUserDetailById } from '@/api/employees'
+import user_info from './components/user_info'
+import job_info from './components/job-info'
 export default {
+  components: { user_info, job_info },
   data() {
     //   const editPassword= editPassword(){}
     return {
