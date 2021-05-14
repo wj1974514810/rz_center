@@ -53,7 +53,7 @@ export default {
     return {
       fileList: [
         {
-          url: 'https://dss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=233301930,3031623456&fm=11&gp=0.jpg'
+          url: ''
         }
       ],
       // 是否显示dialog
@@ -122,6 +122,12 @@ export default {
           this.percentage = progressData.percent * 100
         }
 
+        // 如果遇到旧项目没有箭头函数，就用bind 借调 this
+        // onProgress: function(progressData) {
+        //   // console.log(JSON.stringify(progressData))
+        //   // 进度条实时刷新
+        //   this.percentage = progressData.percent * 100
+        // }.bind(this)
         // 上传后的回调，不一定成功，有err就是失败
       }, (err, data) => {
         console.log(err || data)

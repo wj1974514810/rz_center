@@ -1,5 +1,13 @@
 <template>
   <div class="user-info">
+    <!-- 跳转打印页面 -->
+    <el-row type="flex" justify="end">
+      <el-tooltip content="打印个人基本信息">
+        <router-link :to="`/employees/print/${userId}?type=personal`">
+          <i class="el-icon-printer" />
+        </router-link>
+      </el-tooltip>
+    </el-row>
     <!-- 个人信息 -->
     <el-form label-width="220px">
       <!-- 工号 入职时间 -->
@@ -58,7 +66,7 @@
         <el-col :span="12">
           <el-form-item label="员工头像">
             <!-- 放置上传图片 -->
-
+            <imageUpload ref="userInfoPhoto" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -90,6 +98,7 @@
 
         <el-form-item label="员工照片">
           <!-- 放置上传图片 -->
+          <imageUpload ref="formDataPhoto" />
         </el-form-item>
         <el-form-item label="国家/地区">
           <el-select v-model="formData.nationalArea" class="inputW2">
@@ -361,25 +370,53 @@ export default {
     this.getUserDetailById()
   },
   methods: {
-    //   读取用户详情的基础信息
-    async getPersonalDetail() {
-      this.formData = await getPersonalDetail(this.userId) // 获取员工数据
-    },
-    // 更新用户详情的基础信息
-    async savePersonal() {
-      await updatePersonal({ ...this.formData, id: this.userId })
-      this.$message.success('保存成功')
-    },
-    async saveUser() {
-    //  调用父组件
-    //   保存员工修改信息
-      await saveUserDetailById(this.userInfo)
-      this.$message.success('保存成功')
-    },
-
     // 获取员工个人信息
     async getUserDetailById() {
       this.userInfo = await getUserDetailById(this.userId)
+      // 如果请求返回的数据有图片 就把图片赋给父组件里fileList里面的url
+      if (this.userInfo.staffPhoto) {
+        this.$refs.userInfoPhoto.fileList = [{
+          url: this.userInfo.staffPhoto
+        }]
+      }
+    },
+    async saveUser() {
+      // 保存前获取配套的上传组件文件列表
+      const fileList = this.$refs.userInfoPhoto.fileList
+      // 处理图片未上传成功的情况
+      // 如果fileList[0]存在 并且状态不等于success
+      if (fileList[0] && fileList[0].status !== 'success') {
+        this.$message.warning('请等待图片上传完毕')
+        return
+      }
+      // 保存请求
+      await saveUserDetailById({
+        ...this.userInfo,
+        staffPhoto: fileList[0] ? fileList[0].url : ''
+      })
+      this.$message.success('保存成功')
+    },
+    //   读取用户详情的基础信息
+    async getPersonalDetail() {
+      this.formData = await getPersonalDetail(this.userId) // 获取员工数据
+      // 如果请求返回的数据有图片 就把图片赋给父组件里fileList里面的url
+      if (this.formData.staffPhoto) {
+        this.$refs.formDataPhoto.fileList = [
+          {
+            url: this.formData.staffPhoto
+          }
+        ]
+      }
+    },
+    // 更新用户详情的基础信息
+    async savePersonal() {
+      const fileList = this.$refs.formDataPhoto.fileList
+      if (fileList[0] && fileList[0].status !== 'success') {
+        this.$message.warning('请等待图片上传完成!')
+        return
+      }
+      await updatePersonal({ ...this.formData, id: this.userId, staffPhoto: fileList[0] ? fileList[0].url : '' })
+      this.$message.success('保存成功')
     }
   }
 }

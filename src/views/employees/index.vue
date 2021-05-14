@@ -18,6 +18,11 @@
           <el-table-column align="center" label="序号" sortable="">
             <template slot-scope="scope">{{ (page.page-1)*page.size + scope.$index+1 }}</template>
           </el-table-column>
+          <el-table-column align="center" label="头像" sortable="">
+            <template slot-scope="scope">
+              <img v-imgerr="require('@/assets/common/head.jpg')" :src="scope.row.staffPhoto" alt="" class="avatar" @click="showEwm(scope.row.staffPhoto)">
+            </template>
+          </el-table-column>
           <el-table-column align="center" label="姓名" sortable="" prop="username" />
           <el-table-column align="center" label="工号" sortable="" prop="workNumber" />
           <el-table-column align="center" label="聘用形式" sortable :formatter="formatEmployment" prop="formOfEmployment" />
@@ -55,6 +60,11 @@
         </el-row>
       </el-card>
       <add_employee :show-dialog.sync="showDialog" />
+      <el-dialog title="二维码" :visible="showCavans" @close="showCavans=false">
+        <el-row type="flex" justify="center">
+          <canvas ref="myCanvas" />
+        </el-row>
+      </el-dialog>
     </div>
   </div>
 </template>
@@ -64,10 +74,12 @@ import add_employee from './components/add-employee'
 import { getEmployeeList, delEmployee } from '@/api/employees'
 import EmployeeEnum from '@/api/constant/employees'
 import { formatDate } from '@/filter'
+import Qrcode from 'qrcode'
 export default {
   components: { add_employee },
   data() {
     return {
+      showCavans: false,
       showDialog: false,
       employessList: [],
       page: {
@@ -81,6 +93,21 @@ export default {
     this.getEmployeeList()
   },
   methods: {
+    showEwm(url) {
+      if (url) {
+        this.showCavans = true
+        this.$nextTick(() => {
+          Qrcode.toCanvas(this.$refs.myCanvas, url, {
+            width: 200,
+            dark: {
+              color: '#334455'
+            }
+          })
+        })
+      } else {
+        this.$message.warning('该用户没有头像')
+      }
+    },
     addEmploy() {
       this.showDialog = true
     },
@@ -173,6 +200,10 @@ export default {
 }
 </script>
 
-<style>
-
+<style lang="scss">
+.avatar{
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+}
 </style>
