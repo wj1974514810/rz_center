@@ -18,6 +18,7 @@
                   <el-button
                     size="small"
                     type="success"
+                    @click="assignPerm(row.id)"
                   >分配权限</el-button>
                   <el-button size="small" type="primary" @click="editRole(row.id)">编辑</el-button>
                   <el-button size="small" type="danger" @click="deleteRole(row.id)">删除</el-button>
@@ -76,16 +77,50 @@
           </el-col>
         </el-row>
       </el-dialog>
+      <el-dialog title="分配权限" :visible="showPermDialog" @close="btnPermCancel">
+        <!-- 权限是一颗树 -->
+        <!-- 将数据绑定到组件上 -->
+        <!-- check-strictly 如果为true 那表示父子勾选时  不互相关联 如果为false就互相关联 -->
+        <!-- id作为唯一标识 -->
+        <!-- <el-tree
+          :default-checked-keys="selectCheck"
+        /> -->
+        <!-- 这里并没有 v-model 的双向绑定
+        无论设置绑定还是获取绑定数据, 都靠函数
+        对象中的那个值作为记录的标识, 需要 node-key 进行设定 -->
+        <el-tree
+          ref="permTree"
+          :data="permData"
+          :props="{label: 'name'}"
+          :default-expand-all="true"
+
+          :show-checkbox="true"
+          :check-strictly="true"
+          node-key="id"
+        />
+        <!-- 确定 取消 -->
+        <el-row slot="footer" type="flex" justify="center">
+          <el-col :span="6">
+            <el-button type="primary" size="small" @click="btnPermOK">确定</el-button>
+            <el-button size="small" @click="btnPermCancel">取消</el-button>
+          </el-col>
+        </el-row>
+      </el-dialog>
     </div>
   </div>
 </template>
 <script>
-import { getCompanyInfo, getRoleList, deleteRole, updateRole, addRole, getRoleDetail } from '@/api/setting'
+import { getCompanyInfo, getRoleList, deleteRole, updateRole, addRole, getRoleDetail, assignPermission } from '@/api/setting'
+import { getPermissionList } from '@/api/permission'
+import { listTreeData } from '@/utils'
 // 引入辅助函数
 import { mapGetters } from 'vuex'
 export default {
   data() {
     return {
+      showPermDialog: false,
+      permData: [],
+      userId: '',
       showDialog: false,
       activeName: 'first',
       // 公司信息
@@ -131,6 +166,43 @@ export default {
     this.getRoleList()
   },
   methods: {
+    // 点击分配权限
+  // 获取权限点数据 在点击的时候调用 获取权限点数据
+    async assignPerm(id) {
+      this.userId = id
+      //  获取全部权限列表
+      const list = await getPermissionList()
+      console.log(list)
+      // 转化list到树形数据
+      this.permData = listTreeData(list, '0')
+      // 应该去获取 这个id的 权限点
+      // 有id 就可以 id应该先记录下来
+      const { permIds } = await getRoleDetail(id)
+      console.log(permIds)
+
+      this.showPermDialog = true
+      this.$nextTick(() => {
+        // 将当前角色所拥有的权限id赋值
+        this.$refs.permTree.setCheckedKeys(permIds)
+      })
+    },
+    btnPermCancel() {
+      // 1. 清空数据
+      this.$refs.permTree.setCheckedKeys([])
+      this.showPermDialog = false
+    },
+    async btnPermOK() {
+      // 发请求
+      // 1. 拿到数据 2. 发送api请求
+      const permIds = this.$refs.permTree.getCheckedKeys()
+      const id = this.userId
+      await assignPermission({
+        id,
+        permIds
+      })
+      this.$message.success('修改成功')
+      this.showPermDialog = false
+    },
     // 封装获取公司信息的方法
     async  getCompanyInfo() {
       this.formDate = await getCompanyInfo(this.companyId)

@@ -47,3 +47,13 @@ export function addRole(data) {
     method: 'post'
   })
 }
+
+// 给角色分配权限
+export function assignPermission(data) {
+  return request({
+    url: '/sys/role/assignPrem',
+    method: 'put',
+    data
+  })
+}
+

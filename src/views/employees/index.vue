@@ -44,7 +44,7 @@
               <el-button size="small" type="text">转正</el-button>
               <el-button size="small" type="text">调岗</el-button>
               <el-button size="small" type="text">离职</el-button>
-              <el-button size="small" type="text">角色</el-button>
+              <el-button size="small" type="text" @click="assignRole(row.id)">角色</el-button>
               <el-button size="small" type="text" @click="delEmply(row.id)">删除</el-button>
             </template>
           </el-table-column>
@@ -65,22 +65,26 @@
           <canvas ref="myCanvas" />
         </el-row>
       </el-dialog>
+      <assign_role ref="assignRole" :show-role-dialog="showRoleDialog" :user-id="userId" />
     </div>
   </div>
 </template>
 
 <script>
 import add_employee from './components/add-employee'
+import assign_role from './components/assign-role'
 import { getEmployeeList, delEmployee } from '@/api/employees'
 import EmployeeEnum from '@/api/constant/employees'
 import { formatDate } from '@/filter'
 import Qrcode from 'qrcode'
 export default {
-  components: { add_employee },
+  components: { add_employee, assign_role },
   data() {
     return {
       showCavans: false,
+      showRoleDialog: false,
       showDialog: false,
+      userId: '',
       employessList: [],
       page: {
         page: 1, // 当前页码
@@ -93,6 +97,14 @@ export default {
     this.getEmployeeList()
   },
   methods: {
+    async  assignRole(id) {
+      console.log(id)
+      // 给子组件一个ref,调用子组件的方法
+      await this.$refs.assignRole.getUserDetailById(id)
+      this.userId = id
+      this.showRoleDialog = true
+    },
+    // 显示二维码
     showEwm(url) {
       if (url) {
         this.showCavans = true
@@ -108,6 +120,7 @@ export default {
         this.$message.warning('该用户没有头像')
       }
     },
+    // 添加员工
     addEmploy() {
       this.showDialog = true
     },
