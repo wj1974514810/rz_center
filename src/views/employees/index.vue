@@ -9,7 +9,7 @@
         <template #after>
           <el-button size="small" type="warning" @click="$router.push('/import')">导入</el-button>
           <el-button size="small" type="danger" @click="exportImport">导出</el-button>
-          <el-button size="small" type="primary" @click="addEmploy">新增员工</el-button>
+          <el-button v-if="checkPermission('bb')" size="small" type="primary" @click="addEmploy">新增员工</el-button>
           <!-- <el-button size="small" type="danger" @click="delAll">删除</el-button> -->
         </template>
       </PageTools>
@@ -97,6 +97,10 @@ export default {
     this.getEmployeeList()
   },
   methods: {
+    // 判断有没有权限  有就开放新增员工按钮 没有就不开放
+    checkPermission(pointName) {
+      return this.$store.getters.roles && this.$store.getters.roles.points.includes(pointName)
+    },
     async  assignRole(id) {
       console.log(id)
       // 给子组件一个ref,调用子组件的方法
