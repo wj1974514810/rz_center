@@ -96,6 +96,7 @@
 // }
 
 import { login, getUserInfo, getUserDetailById } from '@/api/user'
+import { resetRouter } from '@/router'
 import { setToken, getToken, removeToken, setTimeStamp } from '@/utils/auth'
 const state = {
   token: getToken(),
@@ -141,12 +142,23 @@ const actions = {
     // 将两个接口返回对象结果合并
     const baseRes = { ...baseInfo, ...res }
     store.commit('setUserInfo', baseRes)
+    return baseRes
   },
   // actions 里面可异步可同步 ，但异步必须放在里面
   logout(store) {
     // 调用两个mutation mutations里面的叫mutation
     store.commit('removeToken')
     store.commit('removeUserInfo')
+    // 清除路由
+    resetRouter()
+    // 清除菜单
+    // 还有一步  vuex中的数据是不是还在
+    // 要清空permission模块下的state数据
+    // vuex中 user子模块  permission子模块
+    // 子模块调用子模块的action  默认情况下 子模块的context是子模块的
+    // 父模块 调用 子模块的action
+    // 子模块调用子模块的action 可以 将 commit的第三个参数 设置成  { root: true } 就表示当前的context不是子模块了 而是父模块
+    store.commit('/permission/filterRoutes', [], { root: true })
   }
 }
 

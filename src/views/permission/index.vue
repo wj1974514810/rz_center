@@ -4,6 +4,7 @@
       <!-- 靠右的按钮 -->
       <page-tools>
         <template v-slot:after>
+          <!-- 添加第一层的权限，传入1  顶级是0 因为它是第一层 -->
           <el-button type="primary" size="small" @click="addPermission(1,'0')">添加权限</el-button>
         </template>
       </page-tools>

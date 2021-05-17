@@ -1,3 +1,4 @@
+import permission from './modules/permission'
 import Vue from 'vue'
 import Vuex from 'vuex'
 import getters from './getters'
@@ -11,7 +12,8 @@ const store = new Vuex.Store({
   modules: {
     app,
     settings,
-    user
+    user,
+    permission
   },
   getters
 })

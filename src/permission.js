@@ -77,9 +77,24 @@ router.beforeEach(async(to, from, next) => {
     } else {
       // 其他页面 放行
       if (!store.getters.userId) {
-        await store.dispatch('user/getUserInfo')
+        // 如果 action return 了数据, 这边可以直接获取
+        console.log('触发帅选')
+        const res = await store.dispatch('user/getUserInfo')
+        // store.state.user.userInfo.roles.menus
+        // 这里是第一次进入页面(刷新)获取用户资料
+        // 用户资料里面有权限列表可以用来做筛选
+        // 将筛选的逻辑放入到 vuex 里面
+        // 需要准备两个数据 1. 全部的动态路由列表 2. 当前用户的信息
+        const routes = await store.dispatch('permission/filterRoutes', res.roles.menus)
+        // 除此之外，我们发现在页面刷新的时候，本来应该拥有权限的页面出现了404，这是因为404的匹配权限放在了静态路由，而动态路由在没有addRoutes之前，找不到对应的地址，就会显示404，所以我们需要将404放置到动态路由的最后
+        router.addRoutes([...routes, { path: '*', redirect: '/404', hidden: true }])
+
+        // 如果是添加的路由, 添加的时间点其实晚于匹配过程, 发现一片空白
+        // 需要在当前的目的地路径中原地跳一次, 重新触发匹配过程才行
+        next(to.path)
+      } else {
+        next()
       }
-      next()
     }
   } else {
     // 没有token
